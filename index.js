@@ -1,6 +1,10 @@
 const inquirer =require ("inquirer");
 
-const fs= require ("fs");
+const { writeFile } = require("fs").promises;
+
+const SVG = require ("./lib/SVG")
+
+const { Circle, Square, Triangle } = require("./lib/shapes")
 
 const questions = [
     {
@@ -26,7 +30,7 @@ const questions = [
         type: 'list',
         name: 'shapes',
         message: 'What shape you want in the logo?',
-        choices: ['circle', 'triangle', 'square'],
+        choices: ['Circle', 'Triangle', 'Square'],
        
     },
     {
@@ -37,4 +41,28 @@ const questions = [
     },
 ];
 
+inquirer.prompt(questions).then(({ shapeText, textColor, shapes, shapeColor }) => {
+    let shape;
+
+    switch (shapes) {
+        case 'Triangle':
+            shape = new Triangle();
+            break;
+        case 'Circle':
+            shape = new Circle();
+            break;
+        default:
+            shape = new Square();
+            break;
+    }
+
+    shape.setColor(shapeColor)
+    const svg = new SVG()
+    svg.setText(shapeText, textColor)
+    svg.setShape(shape)
+    return writeFile("./Examples/logo.svg", svg.render())
+})
+    .then(() => console.log("Generated logo.svg"))
+
+    .catch(err => console.log(err)); 
 
